@@ -4,7 +4,7 @@ import { format, parseISO, addDays } from "date-fns";
 
 export default function BacktesterPage() {
   const [asset, setAsset] = useState("Gold/USD");
-  const [fromDate, setFromDate] = useState("2024-03-01");
+  const [fromDate, setFromDate] = useState("2023-03-01");
   const [toDate, setToDate] = useState("2024-03-31");
   const [strategy, setStrategy] = useState("TWAP");
   const [data, setData] = useState([]);
