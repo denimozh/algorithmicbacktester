@@ -1,5 +1,5 @@
 
-# Algorithmic Backtester – FICC & Commodities
+# Algorithmic Backtester
 
 A **front-end algorithmic trading backtester** simulating different execution strategies (TWAP, VWAP, ICEBERG) on commodities and FX assets. Designed for learning, prototyping, and CV demonstration in FICC and Commodities trading.
 
