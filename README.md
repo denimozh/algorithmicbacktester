@@ -1,40 +1,158 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
 
-## Getting Started
+# Algorithmic Backtester – FICC & Commodities
 
-First, run the development server:
+A **front-end algorithmic trading backtester** simulating different execution strategies (TWAP, VWAP, ICEBERG) on commodities and FX assets. Designed for learning, prototyping, and CV demonstration in FICC and Commodities trading.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+- Realistic **mock price data** generation for Gold/USD, Silver/USD, and Oil/USD.
+- Execution of multiple **trading strategies**: TWAP, VWAP, ICEBERG.
+- **Risk-per-trade scaling** in user-friendly percentage inputs.
+- **Candlestick chart** visualization of historical price data.
+- **Equity curve** dynamically colored for profit/loss moves.
+- **Trade summary table** with PnL, action, and result.
+- Responsive chart sizing and equity curve plotting.
+- Completely **frontend-driven**, no real API required.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+---
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## Mock Data Generation
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Price data is **generated daily** for a chosen date range.
+- **Starting prices**:  
+  - Gold/USD = 2000  
+  - Silver/USD = 25  
+  - Oil/USD = 80
+- **Daily price moves** are random ±4% of the previous close.  
+- **High/Low** are calculated ±2% of the close to simulate realistic intraday ranges.  
 
-## Learn More
+**Example data point structure:**
 
-To learn more about Next.js, take a look at the following resources:
+```json
+{
+  "time": "2024-03-01",
+  "open": 2000,
+  "high": 2040,
+  "low": 1980,
+  "close": 2025
+}
+````
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Trading Strategies
 
-## Deploy on Vercel
+### 1. TWAP (Time-Weighted Average Price)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+* Executes trades **evenly across all days** in the selected period.
+* Reduces market impact by spreading orders.
+* Each trade risks a fixed **percentage of available capital**.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+### 2. VWAP (Volume-Weighted Average Price)
+
+* Executes trades in **fewer slices** (approx. half the days), concentrating on heavier days.
+* Simulates prioritization of volume-heavy periods.
+* Risk per trade is adjusted per slice, maintaining user-specified percentage.
+
+### 3. ICEBERG
+
+* Executes trades in **even fewer, larger slices**, mimicking hidden large orders.
+* Has **slightly higher simulated slippage** to represent market impact.
+* Uses a larger fraction of capital per slice while respecting risk-per-trade input.
+
+---
+
+## Risk and PnL Calculations
+
+* User inputs **risk per trade** as a percentage (e.g., 2 = 2% of capital).
+* **Quantity per trade**:
+
+  ```
+  qty = capital * riskPerTrade / price
+  ```
+* **Simulated slippage**:
+
+  ```
+  slippage = (Math.random() - 0.5) * 0.002 * price * strategyFactor
+  ```
+
+  * `strategyFactor = 2` for ICEBERG, `1` otherwise.
+* **PnL per trade**:
+
+  ```
+  BUY:  pnl = (marketPrice - executionPrice) * qty
+  SELL: pnl = (executionPrice - marketPrice) * qty
+  ```
+* **Cumulative capital** is updated after each trade to simulate compounding.
+
+---
+
+## Charts
+
+### Candlestick Chart
+
+* Displays **mock historical price data**.
+* Marks trades using **colored arrows**:
+
+  * Green arrowUp = profitable BUY
+  * Red arrowDown = losing SELL
+  * Custom colors per strategy:
+
+    * TWAP: green/red
+    * VWAP: cyan/orange
+    * ICEBERG: purple/pink
+
+### Equity Curve
+
+* Shows **cumulative capital over time**.
+* Each segment colored:
+
+  * **Green** = positive move
+  * **Red** = negative move
+* Updates dynamically based on executed trades.
+
+---
+
+## Trade Summary Table
+
+Displays:
+
+| Time       | Action | PnL      | Result |
+| ---------- | ------ | -------- | ------ |
+| 2024-03-01 | BUY    | \$45.00  | Win    |
+| 2024-03-03 | SELL   | -\$30.00 | Loss   |
+
+Provides **clear insight into trade outcomes** and supports analysis of strategy performance.
+
+---
+
+## Usage
+
+1. **Load Mock Data**
+
+   * Select **asset**, **strategy**, **date range**, **starting capital**, and **risk per trade**.
+   * Click **Load Data**.
+
+2. **Run Backtest**
+
+   * Click **Run Backtest** to simulate trades using the selected strategy.
+   * View trades on the candlestick chart and cumulative equity on the equity curve.
+
+3. **Analyze Results**
+
+   * Check the **trade summary table** for individual trade outcomes.
+   * Observe **equity curve** to visualize strategy performance.
+
+---
+
+## Technical Stack
+
+* **React** (Functional Components & Hooks)
+* **lightweight-charts** for visualization
+* **date-fns** for date manipulation
+* Fully **frontend mock backtester** – no external APIs required
+
+---
+
